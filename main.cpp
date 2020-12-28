@@ -3,7 +3,7 @@
 #include "slae_solution.hpp"
 
 // uncomment to test
-//#define TEST
+#define TEST
 
 int main() {
 #ifndef TEST
@@ -47,14 +47,16 @@ int main() {
     print_SLAE(A, B);
 
     // solution
-    std::vector<std::vector<double>> solution_SLAE;
+    // std::vector solution_SLAE = get_SLAE_solution(A, B);
+
     // ожидается:
-    // { {6, -1.5, -1} , {2, -0.5, -2} }
-    solution_SLAE = get_SLAE_solution(A, B);
+    std::vector<std::vector<double>> solution_SLAE{{1, 0, 1.5, 1, 6} , {0, 1, 0.5, 2, 2}};
 
     // должен быть вывод:
     // x_1 = 6 + -1.5 * c_1 + -1 * c_2
     // x_2 = 2 + -0.5 * c_1 + -2 * c_2
+    // x_3 = c1
+    // x_4 = c2
     print_answer(solution_SLAE);
 
 

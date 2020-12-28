@@ -87,19 +87,68 @@ void print_SLAE(const std::vector<std::vector<double>>& A, const std::vector<dou
 
 void print_answer(const std::vector<std::vector<double>>& solution_SLAE) {
 
+    // предполагается, что матрица имеет ступенчатый вид
+    // и содержит base_vars_cnt строк по base_vars_cnt + free_vars_cnt + 1 столбцов
+    // последний столбец - свободные члены
+
     std::cout << "Answer" << std::endl;
+
     // если пусто, то нет решений
     if(solution_SLAE.empty()) {
         std::cout << "No solution" << std::endl;
         return;
     }
 
-    // количество строк в solution_SlAE = solutionSLAE.size() = количество зависимых переменных
-    for (size_t i = 0; i < solution_SLAE.size(); ++i) {
-        std::cout << ("x_" + std::to_string(i + 1)) << "= " << solution_SLAE[i][0];
-        for (size_t j = 1; j < solution_SLAE[i].size(); ++j) {
-            std::cout << " + " << solution_SLAE[i][j] << " * c" << std::to_string(j);
+    // число зависимых переменных = числу строк в матрице
+    size_t base_vars_cnt = solution_SLAE.size();
+
+    // число свободных переменных = число столбцов - свободный член - число строк
+    size_t free_vars_cnt = solution_SLAE[0].size() - 1 - base_vars_cnt;
+
+
+    // свободные переменные имеют значение ci, i = 1, 2 и т.д.
+    // в этом векторе храним индекс с, для базисных индекс i у с = 0
+    std::vector<size_t> free_vars(free_vars_cnt + base_vars_cnt, 0);
+
+    // присваиваем значения индексов i у с свободным переменным для кооректного вывода зависимых
+    size_t num_of_free_var = 1;
+    for (size_t i = 0; i < (free_vars_cnt + base_vars_cnt); ++i) {
+        if ((i < base_vars_cnt) && (solution_SLAE[i][i] == 0)) {
+            free_vars[i] = num_of_free_var;
+            ++num_of_free_var;
+        }
+        if ((i >= base_vars_cnt) && (num_of_free_var <= free_vars_cnt)) {
+            free_vars[i] = num_of_free_var;
+            ++num_of_free_var;
+        }
+    }
+
+    // вывод зависимых переменных
+    for (size_t i = 0; i < base_vars_cnt; ++i) {
+
+        // если номер строки не равен номеру базисной переменной, то найдём текущую базисную
+        size_t num_of_base_var = i;
+        while (free_vars[num_of_base_var] != 0) {
+            ++num_of_base_var;
+        }
+
+        // выводим свободный член
+        std::cout << ("x_" + std::to_string(num_of_base_var + 1)) << " = " << solution_SLAE[i][solution_SLAE[i].size() - 1];
+
+        // выводим комбинацию из свободных переменных
+        for (size_t j = i + 1; j < solution_SLAE[i].size() - 1; ++j) {
+            if (solution_SLAE[i][j] != 0) {
+                std::cout << " + " << -solution_SLAE[i][j] << " * c" << std::to_string(free_vars[j]);
+            }
         }
         std::cout << std::endl;
+    }
+
+    // вывод свободных переменных
+    for (size_t i = 0; i < free_vars.size(); ++i) {
+        if(free_vars[i] != 0) {
+            std::cout << "x_" + std::to_string(i + 1) << " = " << "c" << std::to_string(free_vars[i]);
+            std::cout << std::endl;
+        }
     }
 }
