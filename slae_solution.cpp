@@ -99,49 +99,85 @@ void print_answer(const std::vector<std::vector<double>>& solution_SLAE) {
         return;
     }
 
-    // число зависимых переменных = числу строк в матрице
-    size_t base_vars_cnt = solution_SLAE.size();
+    // число базисных переменных
+    // считаем, что изначально все свободные
+    size_t base_vars_cnt = 0;
 
-    // число свободных переменных = число столбцов - свободный член - число строк
-    size_t free_vars_cnt = solution_SLAE[0].size() - 1 - base_vars_cnt;
+    // число свободных переменных
+    size_t free_vars_cnt = solution_SLAE[0].size() - 1;
 
-
-    // свободные переменные имеют значение ci, i = 1, 2 и т.д.
+    // свободные переменные имеют значения ci, i = 1, 2 и т.д.
     // в этом векторе храним индекс с, для базисных индекс i у с = 0
     std::vector<size_t> free_vars(free_vars_cnt + base_vars_cnt, 0);
 
-    // присваиваем значения индексов i у с свободным переменным для кооректного вывода зависимых
-    size_t num_of_free_var = 1;
-    for (size_t i = 0; i < (free_vars_cnt + base_vars_cnt); ++i) {
-        if ((i < base_vars_cnt) && (solution_SLAE[i][i] == 0)) {
-            free_vars[i] = num_of_free_var;
-            ++num_of_free_var;
-        }
-        if ((i >= base_vars_cnt) && (num_of_free_var <= free_vars_cnt)) {
-            free_vars[i] = num_of_free_var;
-            ++num_of_free_var;
+    // присваиваем значения индексов i у с свободным переменным для корректного вывода базисных
+    size_t ci = 1;
+    size_t column = 0;
+    size_t line = 0;
+    while ((column < solution_SLAE[0].size() - 1)) {
+        // если ещё в матрице
+        if ((line < solution_SLAE.size())) {
+            // подразумеваем, что коэф. перед базисными уже = 1
+            if (solution_SLAE[line][column] != 0) {
+                // нашли базисную
+                ++base_vars_cnt;
+                ++line;
+                ++column;
+            } else {
+                // нашли свободную
+                free_vars[column] = ci;
+                ++ci;
+                ++column;
+                // проверяем, есть ли в строке базисная
+                while (column < (solution_SLAE[line].size() - 1)) {
+
+                    if (solution_SLAE[line][column] != 0) {
+                        // наткнулись на базисную
+                        ++base_vars_cnt;
+                        ++line;
+                        ++column;
+                        break;
+                    } else {
+                        // наткнулись на свободную
+                        free_vars[column] = ci;
+                        ++ci;
+                        ++column;
+                    }
+                }
+            }
+        } else {
+            // вышли из матрицы, но прошлись не по всем переменным
+            // остались свободные
+            // здесь line <= column < free_vars.size
+            free_vars[column] = ci;
+            ++ci;
+            ++column;
         }
     }
 
-    // вывод зависимых переменных
+    // вывод базисных переменных
+    size_t pos_of_base_var = 0;
     for (size_t i = 0; i < base_vars_cnt; ++i) {
 
-        // если номер строки не равен номеру базисной переменной, то найдём текущую базисную
-        size_t num_of_base_var = i;
-        while (free_vars[num_of_base_var] != 0) {
-            ++num_of_base_var;
+        // если номер строки не равен номеру базисных переменной, то найдём текущую базисную
+        while (free_vars[pos_of_base_var] != 0) {
+            ++pos_of_base_var;
         }
 
         // выводим свободный член
-        std::cout << ("x_" + std::to_string(num_of_base_var + 1)) << " = " << solution_SLAE[i][solution_SLAE[i].size() - 1];
+        std::cout << ("x_" + std::to_string(pos_of_base_var + 1)) << " = " << solution_SLAE[i][solution_SLAE[i].size() - 1];
+
 
         // выводим комбинацию из свободных переменных
-        for (size_t j = i + 1; j < solution_SLAE[i].size() - 1; ++j) {
+        for (size_t j = pos_of_base_var + 1; j < solution_SLAE[i].size() - 1; ++j) {
             if (solution_SLAE[i][j] != 0) {
                 std::cout << " + " << -solution_SLAE[i][j] << " * c" << std::to_string(free_vars[j]);
             }
         }
         std::cout << std::endl;
+
+        // корректируем позицию поиска следующей базисной переменной
+        ++pos_of_base_var;
     }
 
     // вывод свободных переменных
