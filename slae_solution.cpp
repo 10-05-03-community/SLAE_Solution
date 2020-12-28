@@ -128,22 +128,6 @@ void print_answer(const std::vector<std::vector<double>>& solution_SLAE) {
                 free_vars[column] = ci;
                 ++ci;
                 ++column;
-                // проверяем, есть ли в строке базисная
-                while (column < (solution_SLAE[line].size() - 1)) {
-
-                    if (solution_SLAE[line][column] != 0) {
-                        // наткнулись на базисную
-                        ++base_vars_cnt;
-                        ++line;
-                        ++column;
-                        break;
-                    } else {
-                        // наткнулись на свободную
-                        free_vars[column] = ci;
-                        ++ci;
-                        ++column;
-                    }
-                }
             }
         } else {
             // вышли из матрицы, но прошлись не по всем переменным
@@ -165,13 +149,12 @@ void print_answer(const std::vector<std::vector<double>>& solution_SLAE) {
         }
 
         // выводим свободный член
-        std::cout << ("x_" + std::to_string(pos_of_base_var + 1)) << " = " << solution_SLAE[i][solution_SLAE[i].size() - 1];
-
+        std::cout << "x_" << (pos_of_base_var + 1) << " = " << solution_SLAE[i][solution_SLAE[i].size() - 1];
 
         // выводим комбинацию из свободных переменных
         for (size_t j = pos_of_base_var + 1; j < solution_SLAE[i].size() - 1; ++j) {
             if (solution_SLAE[i][j] != 0) {
-                std::cout << " + " << -solution_SLAE[i][j] << " * c" << std::to_string(free_vars[j]);
+                std::cout << " + " << -solution_SLAE[i][j] << " * c" << free_vars[j];
             }
         }
         std::cout << std::endl;
@@ -183,8 +166,7 @@ void print_answer(const std::vector<std::vector<double>>& solution_SLAE) {
     // вывод свободных переменных
     for (size_t i = 0; i < free_vars.size(); ++i) {
         if(free_vars[i] != 0) {
-            std::cout << "x_" + std::to_string(i + 1) << " = " << "c" << std::to_string(free_vars[i]);
-            std::cout << std::endl;
+            std::cout << "x_" << (i + 1) << " = c" << free_vars[i] << std::endl;
         }
     }
 }
