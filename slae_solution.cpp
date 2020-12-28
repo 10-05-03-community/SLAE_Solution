@@ -80,7 +80,7 @@ void print_SLAE(const std::vector<std::vector<double>>& A, const std::vector<dou
         for (size_t j = 0; j < A[i].size() - 1; ++j) {
             std::cout << A[i][j] << " * x" << std::to_string(j + 1) << " + ";
         }
-        std::cout << A[i][A[i].size() - 1] << " = " << B[i] << std::endl;
+        std::cout << A[i][A[i].size() - 1] << " * x" + std::to_string(A[i].size()) << " = " << B[i] << std::endl;
     }
     std::cout << std::endl;
 }
