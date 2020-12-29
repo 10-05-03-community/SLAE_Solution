@@ -5,6 +5,8 @@
 // если пусто, то нет решений
 std::vector<std::vector<double>> get_SLAE_solution(std::vector<std::vector<double>> A, std::vector<double> B) {
 
+    int size = A[0].size();
+
     for (size_t j = 0; j < A[0].size(); ++j) {
 
         size_t i = find_nonzero_element(A, j);
@@ -21,19 +23,27 @@ std::vector<std::vector<double>> get_SLAE_solution(std::vector<std::vector<doubl
 
         find_base_variables(A, B);
 
-        std::vector<std::vector<double>> A_B(A.size(), std::vector<double>(A[0].size() + 1, 0));
+        if (A.size() != 0) {
+            std::vector<std::vector<double>> A_B(A.size(), std::vector<double>(A[0].size() + 1, 0));
 
-        for (size_t i = 0; i < A_B.size(); ++i) {
-            for (size_t j = 0; j < A_B[0].size(); ++j) {
-                if (j == A_B[0].size() - 1) {
-                    A_B[i][j] = B[i];
-                }
-                else {
-                    A_B[i][j] = A[i][j];
+            for (size_t i = 0; i < A_B.size(); ++i) {
+                for (size_t j = 0; j < A_B[0].size(); ++j) {
+                    if (j == A_B[0].size() - 1) {
+                        A_B[i][j] = B[i];
+                    }
+                    else {
+                        A_B[i][j] = A[i][j];
+                    }
                 }
             }
+            return A_B;
         }
-        return A_B;
+        else {
+            std::vector<std::vector<double>> A_B(1, std::vector<double>(size + 1, 0));
+
+            return A_B;
+        }
+
     }
 
     return std::vector<std::vector<double>>();
